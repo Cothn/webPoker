@@ -11,12 +11,28 @@ using System.Threading;
 
 namespace WebPokerConsoleClient
 {
+    public class Player
+    {
+        public string login;
+        public string name;
+        public byte card1;
+        public byte card2;
+        public byte blind;
+        public int money;
+        public bool fold = false;
+        public int bet;
+    }
     class Program
     {
         static void Main(string[] args)
         {
             try
             {
+                Console.WriteLine("Введите Login");
+                string login = Console.ReadLine();
+                Console.WriteLine("Введите Name");
+                string name = Console.ReadLine();
+
                 //конечная локальная точка
                 IPHostEntry ipHost = Dns.GetHostEntry("localhost");
                 IPAddress ipAddr = ipHost.AddressList[1];
@@ -28,7 +44,7 @@ namespace WebPokerConsoleClient
                 //Сокет подключение
                 sender.Connect(ipEndPoint);
 
-                User user = new User("Test", "TestPass");
+                User user = new User(login, name);
                 //общаемся с сервером
                 JsonHandle.SendObject(sender, user);
 
@@ -48,8 +64,13 @@ namespace WebPokerConsoleClient
                 //Сокет подключение
                 UserListener.Bind(ipEndPoint);
                 UserListener.Listen(1);
-                UserListener.Accept();
+                Socket handler = UserListener.Accept();
                 Console.WriteLine("Ожидаем соединения через {0}", ipEndPoint);
+
+
+                List<Player> playerList = (List<Player>)JsonConvert.DeserializeObject<List<Player>>(JsonHandle.ReciveString(handler));
+
+
                 Console.ReadLine();
             }
             catch (Exception ex)

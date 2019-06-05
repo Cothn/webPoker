@@ -8,12 +8,12 @@ namespace WebPokerConsoleClient
     class User
     {
         public string login = "";
-        public string password = "";
+        public string name = "";
 
-        public User(string log, string pass)
+        public User(string log, string nameUser)
         {
             login = log;
-            password = pass;
+            name = nameUser;
         }
     }
 }

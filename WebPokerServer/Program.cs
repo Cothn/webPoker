@@ -55,7 +55,8 @@ namespace WebPokerServer
             {
 
                 Players = CreatePlayerList(UsersList);
-                StartGame(UsersSocketList,ref Players);
+                StartGame(UsersSocketList, ref Players);
+                SendToPlayers(UsersSocketList, Players);
             }
             Console.ReadLine();
 
@@ -144,10 +145,22 @@ namespace WebPokerServer
             return result;
         }
 
-        static void SedToPlayers(List<Socket> UsersSockets, ref List<Player> PlayerList) 
+        static void SendToPlayers(List<Socket> UsersSockets, List<Player> PlayerList) 
         {
-        
-        
+            for (int i = 0; i < UsersSockets.Count(); i++)
+            {
+                List<Player> SendList = PlayerList;
+                for (int j = 0; j < PlayerList.Count(); j++)
+                {
+                    if (i != j)
+                    {
+                        SendList[j].card1 = 0;
+                        SendList[j].card2 = 0;
+                    }
+
+                }
+                JsonHandle.SendObject(UsersSockets[i], SendList);
+            }
         }
 
         static List<Player> CreatePlayerList(List<User> UsersList)

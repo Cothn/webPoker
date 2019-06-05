@@ -9,6 +9,6 @@ namespace WebPokerServer
     class User
     {
         public string login = "";
-        public string password = "";
+        public string name = "";
     }
 }

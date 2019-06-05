@@ -7,6 +7,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace WebPokerConsoleClient
 {
@@ -20,7 +21,6 @@ namespace WebPokerConsoleClient
                 IPHostEntry ipHost = Dns.GetHostEntry("localhost");
                 IPAddress ipAddr = ipHost.AddressList[1];
                 IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
-
 
                 //Сoздаем сокет Tcp/Ip
                 Socket sender = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);

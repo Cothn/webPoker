@@ -14,36 +14,29 @@ namespace WebPokerConsoleClient
     {
         static void Main(string[] args)
         {
-            //конечная локальная точка
-            IPHostEntry ipHost = Dns.GetHostEntry("localhost");
-            IPAddress ipAddr = ipHost.AddressList[1];
-            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
-
-
-            //Сoздаем сокет Tcp/Ip
-
-
-            //Сокет для локальной точки и прослушивание входящих сокетов
             try
             {
+                //конечная локальная точка
+                IPHostEntry ipHost = Dns.GetHostEntry("localhost");
+                IPAddress ipAddr = ipHost.AddressList[1];
+                IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
 
-                //начинаем слушать
-                while (true)
-                {
-                    Socket sender = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    sender.Connect(ipEndPoint);
 
-                    User user = new User("Test", "TestPass");
-                    //общаемся с сервером
-                    JsonHandle.SendObject(sender, user);
+                //Сoздаем сокет Tcp/Ip
+                Socket sender = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-                    //слушаем
-                    int port = (int)JsonConvert.DeserializeObject<int>(JsonHandle.ReciveString(sender));
+                //Сокет подключение
+                sender.Connect(ipEndPoint);
 
-                    sender.Shutdown(SocketShutdown.Both);
-                    sender.Close();
+                User user = new User("Test", "TestPass");
+                //общаемся с сервером
+                JsonHandle.SendObject(sender, user);
 
-                }
+                //слушаем
+                int port = (int)JsonConvert.DeserializeObject<int>(JsonHandle.ReciveString(sender));
+                Console.WriteLine("port: {0}", port);
+                sender.Shutdown(SocketShutdown.Both);
+                sender.Close();
             }
             catch (Exception ex)
             {

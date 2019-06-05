@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace WebPokerConsoleClient
 {
-
+    public enum TPokerAction { Check = 0, Rais = 1, Fold = 2};
     class Program
     {
         static void Main(string[] args)
@@ -55,12 +55,40 @@ namespace WebPokerConsoleClient
                 UserListener.Bind(ipEndPoint);
                 UserListener.Listen(1);
                 Socket handler = UserListener.Accept();
-                Console.WriteLine("Ожидаем соединения через {0}", ipEndPoint);
+                //Console.WriteLine("Ожидаем соединения через {0}", ipEndPoint);
 
-
+                //раздача
                 List<Player> playerList = (List<Player>)JsonConvert.DeserializeObject<List<Player>>(JsonHandle.ReciveString(handler));
-
-
+                int gamerNumber =0;
+                for( int i=0; i< playerList.Count(); i++)
+                {
+                    if (playerList[i].login == login)
+                    {   
+                        gamerNumber = i;
+                        break;
+                    }
+                }
+                Console.WriteLine("Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet +", Остаток:" + playerList[gamerNumber]);
+                bool stop = true;
+                do{
+                    Console.WriteLine("Введите команду 0,1,2");
+                    TPokerAction PokerAction = (TPokerAction)(Console.Read() - (byte)'0');
+                    JsonHandle.SendObject(handler, PokerAction);
+                    if (PokerAction == TPokerAction.Rais)
+                    {
+                        Console.WriteLine("Введите ставку :");
+                        int bet = int.Parse(Console.ReadLine());
+                        JsonHandle.SendObject(handler, bet);
+                    }
+                    playerList = (List<Player>)JsonConvert.DeserializeObject<List<Player>>(JsonHandle.ReciveString(handler));
+                    Console.WriteLine("Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber] + "  _Table_  " + playerList[gamerNumber].table);
+                    stop = JsonConvert.DeserializeObject<bool>(JsonHandle.ReciveString(handler));
+                }while(!stop);
+                List<string> winers = JsonConvert.DeserializeObject<List<string>>(JsonHandle.ReciveString(handler));
+                for (int i = 0; i < winers.Count(); i++)
+                {
+                    Console.WriteLine(winers);
+                }
                 Console.ReadLine();
             }
             catch (Exception ex)

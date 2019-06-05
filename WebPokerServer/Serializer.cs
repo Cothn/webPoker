@@ -24,7 +24,7 @@ namespace WebPokerServer
         public static void SendObject(Socket handler, object SendObject)
         {
 
-            // десериализация
+            // сериализация
             string jsonObject = JsonConvert.SerializeObject(SendObject, Formatting.Indented);
 
             byte[] replyBuf = Encoding.UTF8.GetBytes(jsonObject);

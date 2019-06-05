@@ -12,9 +12,16 @@ using System.Threading;
 namespace WebPokerServer
 {//11000
 
-
+    public enum TPokerAction { Check = 0, Rais = 1, Fold = 2};
     class Program
     {
+
+        public static int AllMoney = 0;
+        public static int tekBet = 5;
+        public static int BigBlaind = 5;
+        public static Cards cards;
+        public static Random rand = new Random();
+        public static int ColClient = 5;
         static bool CheckTimeOk(DateTime Start, byte minuts)
         { return (DateTime.UtcNow - Start) < TimeSpan.FromMinutes(minuts); }
         static void ListnerTimer(object listner)
@@ -35,23 +42,32 @@ namespace WebPokerServer
 
             //Ввод числа игроков
             Console.WriteLine("Введите число игроков (от 2 до 5)");
-            int ColClient = Console.Read() - (byte)'0';
+            ColClient = Console.Read() - (byte)'0';
             if (ColClient < 2)
                 ColClient = 2;
             else if (ColClient > maxColClient)
             { ColClient = 5; }
 
-            while (StartConnect(ColClient,ref UsersSocketList, ref UsersList))
+            while (StartConnect(ColClient, ref UsersSocketList, ref UsersList))
             {
 
                 Players = CreatePlayerList(UsersList);
                 StartGame(UsersSocketList, ref Players);
                 SendToPlayers(UsersSocketList, Players);
+                Game(UsersSocketList, ref Players);
+
+                //string jsonObjectString = JsonConvert.SerializeObject(Players, Formatting.Indented);
+
+                //// файл для записи сериализованного объекта
+                //StreamWriter Sw = new StreamWriter("Player.txt");
+                //Sw.Write(jsonObjectString);
+                //Sw.Flush();
+                //Sw.Close();
             }
             Console.ReadLine();
 
         }
-        static bool StartConnect(int ColClient,ref List<Socket> UsersSockets, ref List<User> Users)
+        static bool StartConnect(int ColClient, ref List<Socket> UsersSockets, ref List<User> Users)
         {
             bool result = true;
             try
@@ -137,20 +153,51 @@ namespace WebPokerServer
 
         static void SendToPlayers(List<Socket> UsersSockets, List<Player> PlayerList) 
         {
+            string jsonObjectString = JsonConvert.SerializeObject(PlayerList, Formatting.Indented);
+
+            // файл для записи сериализованного объекта
+            StreamWriter Sw = new StreamWriter("PlayerTmp.json");
+            Sw.Write(jsonObjectString);
+            Sw.Flush();
+            Sw.Close();
             for (int i = 0; i < UsersSockets.Count(); i++)
             {
-                List<Player> SendList = PlayerList;
+                // десериализация из файла
+                StreamReader Sr = new StreamReader("PlayerTmp.json");
+                string jsonObject = Sr.ReadToEnd();
+                List<Player> SendList = JsonConvert.DeserializeObject<List<Player>>(jsonObject);
+                Sr.Close();
                 for (int j = 0; j < PlayerList.Count(); j++)
                 {
                     if (i != j)
                     {
-                        SendList[j].card1 = 0;
-                        SendList[j].card2 = 0;
+                        SendList[j].card1 = "00";
+                        SendList[j].card2 = "00";
                     }
 
                 }
                 JsonHandle.SendObject(UsersSockets[i], SendList);
             }
+        }
+
+
+                    playerList = (List<Player>)JsonConvert.DeserializeObject<List<Player>>(JsonHandle.ReciveString(handler));
+                    Console.WriteLine("Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber] + "  _Table_  " + playerList[gamerNumber].table);
+                    stop = JsonConvert.DeserializeObject<bool>(JsonHandle.ReciveString(handler));
+
+        static void Game(List<Socket> UsersSockets, ref List<Player> PlayerList)
+        {
+            TPokerAction pokerAction;
+            bool stop = false;
+            do{
+                for (int i = 0; i < UsersSockets.Count(); i++)
+                {
+                    pokerAction = JsonConvert.DeserializeObject<TPokerAction>(JsonHandle.ReciveString(UsersSockets[i]));
+                    switch {}
+                
+
+                }
+            }while(!stop);
         }
 
         static List<Player> CreatePlayerList(List<User> UsersList)
@@ -203,11 +250,29 @@ namespace WebPokerServer
 
         static void StartGame(List<Socket> UsersSockets, ref List<Player> PlayerList)
         {
+            int num;
+            BigBlaind = ColClient;
+            AllMoney = 0;
+            tekBet = 5;
+            cards = new Cards();
             foreach (Player player in PlayerList) 
             {
+                player.bet += tekBet;
+                player.money -= tekBet;
+                AllMoney += tekBet;
+                num = rand.Next(0, cards.Deck.Count());
+                player.card1 = cards.Deck[num];
+                cards.Deck.Remove(player.card1);
+                num = rand.Next(0, cards.Deck.Count());
+                player.card2 = cards.Deck[num];
+                cards.Deck.Remove(player.card2);
             
             }
-
+            num = BigBlaind % ColClient +1;
+            PlayerList[num].bet += tekBet;
+            PlayerList[num].money -= tekBet;
+            AllMoney += tekBet;
+            tekBet += tekBet;
         }
 
     }

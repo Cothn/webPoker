@@ -16,11 +16,12 @@ namespace WebPokerServer
     {
         public string login;
         public string name;
-        public byte card1;
-        public byte card2;
-        public byte blind;
+        public string card1;
+        public string card2;
         public int money;
+        public int bank;
         public bool fold = false;
         public int bet;
+        public string table;
     }
 }

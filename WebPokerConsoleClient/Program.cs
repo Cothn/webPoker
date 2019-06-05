@@ -34,9 +34,23 @@ namespace WebPokerConsoleClient
 
                 //слушаем
                 int port = (int)JsonConvert.DeserializeObject<int>(JsonHandle.ReciveString(sender));
+
                 Console.WriteLine("port: {0}", port);
+
+                //close
                 sender.Shutdown(SocketShutdown.Both);
                 sender.Close();
+
+                //open
+                Socket UserListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                ipEndPoint = new IPEndPoint(ipAddr, port);
+
+                //Сокет подключение
+                UserListener.Bind(ipEndPoint);
+                UserListener.Listen(1);
+                UserListener.Accept();
+                Console.WriteLine("Ожидаем соединения через {0}", ipEndPoint);
+                Console.ReadLine();
             }
             catch (Exception ex)
             {

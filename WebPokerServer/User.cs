@@ -19,9 +19,9 @@ namespace WebPokerServer
         public string card1;
         public string card2;
         public int money;
-        public int bank;
         public bool fold = false;
         public int bet;
-        public string table;
+        public int MaxBet;
+        public string table = "";
     }
 }

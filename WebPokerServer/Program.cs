@@ -8,16 +8,16 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace WebPokerServer
 {//11000
-
     public enum TPokerAction { Check = 0, Rais = 1, Fold = 2};
     class Program
     {
 
         public static int AllMoney = 0;
-        public static int tekBet = 5;
+        public static int MaxBet = 5;
         public static int BigBlaind = 5;
         public static Cards cards;
         public static Random rand = new Random();
@@ -53,8 +53,9 @@ namespace WebPokerServer
 
                 Players = CreatePlayerList(UsersList);
                 StartGame(UsersSocketList, ref Players);
-                SendToPlayers(UsersSocketList, Players);
+                SendToPlayersSecret(UsersSocketList, Players);
                 Game(UsersSocketList, ref Players);
+                GameResult(UsersSocketList, ref Players);
 
                 //string jsonObjectString = JsonConvert.SerializeObject(Players, Formatting.Indented);
 
@@ -73,7 +74,7 @@ namespace WebPokerServer
             try
             {
                 //конечная локальная точка
-                int Port = 11000; 
+                int Port = 11006; 
                 IPHostEntry ipHost = Dns.GetHostEntry("localhost");
                 IPAddress ipAddr = ipHost.AddressList[1];
                 IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, Port);
@@ -151,7 +152,7 @@ namespace WebPokerServer
             return result;
         }
 
-        static void SendToPlayers(List<Socket> UsersSockets, List<Player> PlayerList) 
+        static void SendToPlayersSecret(List<Socket> UsersSockets, List<Player> PlayerList) 
         {
             string jsonObjectString = JsonConvert.SerializeObject(PlayerList, Formatting.Indented);
 
@@ -176,28 +177,252 @@ namespace WebPokerServer
                     }
 
                 }
+                JsonHandle.SendObject(UsersSockets[i], true); //refresh
+                Thread.Sleep(100);
                 JsonHandle.SendObject(UsersSockets[i], SendList);
+                Thread.Sleep(100);
             }
         }
 
-
-                    playerList = (List<Player>)JsonConvert.DeserializeObject<List<Player>>(JsonHandle.ReciveString(handler));
-                    Console.WriteLine("Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber] + "  _Table_  " + playerList[gamerNumber].table);
-                    stop = JsonConvert.DeserializeObject<bool>(JsonHandle.ReciveString(handler));
 
         static void Game(List<Socket> UsersSockets, ref List<Player> PlayerList)
         {
             TPokerAction pokerAction;
             bool stop = false;
+            bool raise = true;
             do{
+
+                raise = false;
                 for (int i = 0; i < UsersSockets.Count(); i++)
                 {
-                    pokerAction = JsonConvert.DeserializeObject<TPokerAction>(JsonHandle.ReciveString(UsersSockets[i]));
-                    switch {}
-                
+                    if ((PlayerList[i].fold != true) && PlayerList[i].money != 0)
+                    {
+                        JsonHandle.SendObject(UsersSockets[i], false); //stop
+                        Thread.Sleep(100);
+                        JsonHandle.SendObject(UsersSockets[i], stop);
+                        pokerAction = JsonConvert.DeserializeObject<TPokerAction>(JsonHandle.ReciveString(UsersSockets[i]));
+                        switch (pokerAction)
+                        {
+                            case TPokerAction.Check:
+                                PlayerList[i].money = PlayerList[i].money + PlayerList[i].MaxBet - MaxBet;
+                                if (PlayerList[i].money > 0)
+                                {
+                                    AllMoney = AllMoney - PlayerList[i].MaxBet + MaxBet;
+                                    PlayerList[i].MaxBet = MaxBet;
+                                }
+                                else
+                                {
+                                    AllMoney = AllMoney - PlayerList[i].MaxBet + MaxBet + PlayerList[i].money;
+                                    PlayerList[i].MaxBet = MaxBet + PlayerList[i].money;
+                                    PlayerList[i].money = 0;
+                                }
+                                break;
+                            case TPokerAction.Rais:
+                                int DopBet = JsonConvert.DeserializeObject<int>(JsonHandle.ReciveString(UsersSockets[i]));
 
+                                if (PlayerList[i].MaxBet + DopBet < MaxBet)
+                                { DopBet = MaxBet - PlayerList[i].MaxBet; }
+                                PlayerList[i].money = PlayerList[i].money - DopBet;
+                                if (PlayerList[i].money > 0)
+                                {
+                                    AllMoney += DopBet;
+                                    PlayerList[i].MaxBet += DopBet;
+
+                                }
+                                else
+                                {
+                                    AllMoney = AllMoney + DopBet + PlayerList[i].money;
+                                    PlayerList[i].MaxBet = PlayerList[i].MaxBet + DopBet + PlayerList[i].money;
+                                    PlayerList[i].money = 0;
+                                }
+                                if (MaxBet < PlayerList[i].MaxBet)
+                                {
+                                    MaxBet = PlayerList[i].MaxBet;
+                                    raise = true;
+                                }
+                                break;
+                            default:
+                                PlayerList[i].fold = true;
+                                PlayerList[i].MaxBet = 0;
+                                break;
+                        }
+                        PlayerList[i].MaxBet = MaxBet;
+                        
+                    }
+
+                    SendToPlayersSecret(UsersSockets, PlayerList);
                 }
+
+                //new circle
+                raise = raise && (PlayerList[0].MaxBet != MaxBet);
+                stop = ((PlayerList[0].table.Length == 10) && (raise == false));
+                if ((raise == false) && !stop)
+                {
+                    int num = rand.Next(0, cards.Deck.Count());
+                    string TableCard = cards.Deck[num];
+                    cards.Deck.Remove(TableCard);
+                    if (PlayerList[0].table == "")
+                    {
+                        num = rand.Next(0, cards.Deck.Count());
+                        TableCard += cards.Deck[num];
+                        cards.Deck.Remove(cards.Deck[num]);
+                        num = rand.Next(0, cards.Deck.Count());
+                        TableCard += cards.Deck[num];
+                        cards.Deck.Remove(cards.Deck[num]);
+                    }
+                    foreach(Player player in PlayerList)
+                    {
+                        player.table =  player.table + TableCard;
+                    }
+                }
+                SendToPlayersSecret(UsersSockets, PlayerList);
+                // stop game
             }while(!stop);
+            for (int i = 0; i < UsersSockets.Count(); i++)
+            {
+                JsonHandle.SendObject(UsersSockets[i], false); //stop
+                Thread.Sleep(100);
+                JsonHandle.SendObject(UsersSockets[i], stop);
+            }
+
+        }
+
+
+
+    public enum Ranks
+    {
+        A = 14, K = 13, Q = 12, J = 11,
+        Ten = 10, Nine = 9, Eight = 8, Seven = 7, Six = 6,
+        Five = 5, Four = 4, Tree = 3, Two = 2
+    }
+    public enum Suits { Hearts, Diamonds, Clubs, Spades }
+    public enum Combinations
+    {
+        Uknown = 0, HighCard = 1, Pair = 2, TwoPairs = 3, Tree = 4,
+        Streight = 5, Flash = 6, FullHouse = 7, Kare = 8, StreightFlash = 9
+    }
+
+        static int GameResult(List<Socket> UsersSockets, ref List<Player> PlayerList)
+        {
+            string winers = String.Empty;
+            int Rang = 0;
+            List<int> HeightList = new List<int>();
+            for (int l = 0; l < PlayerList.Count; l = l+ 1)
+            {
+                string bufStr;
+                bufStr = PlayerList[l].table + PlayerList[l].card1 + PlayerList[l].card2;
+                for (int t = 0; t < 12; t = t+2)
+                {
+
+                    for (int o = t+2; o<12; o = o+2)
+                    {
+                        bufStr = bufStr.Substring(0, t) + bufStr.Substring(t + 2, t + o) + bufStr.Substring(t + o +2, bufStr.Length - t -o -2);
+
+
+
+                        Char[] charArray = bufStr.ToCharArray();
+                        for (int j = 0; j < charArray.Length; j++)
+                        {
+                            if (charArray[j].Equals('T'))
+                                charArray[j] = (char)59;
+                            if (charArray[j].Equals('J'))
+                                charArray[j] = (char)60;
+                            if (charArray[j].Equals('Q'))
+                                charArray[j] = (char)61;
+                            if (charArray[j].Equals('K'))
+                                charArray[j] = (char)62;
+                            if (charArray[j].Equals('A'))
+                                charArray[j] = (char)63;
+                        }
+                        for (int j = 0; j < charArray.Length; j = j + 2)
+                        {
+                            for (int k = 0; k < charArray.Length - 3; k = k + 2)
+                            {
+                                if (charArray[k] > charArray[k + 2])
+                                {
+                                    Char buf = charArray[k + 2];
+                                    charArray[k + 2] = charArray[k];
+                                    charArray[k] = buf;
+                                    buf = charArray[k + 1];
+                                    charArray[k + 1] = charArray[k + 3];
+                                    charArray[k + 3] = buf;
+                                }
+
+
+                            }
+
+                        }
+
+
+                        bool flash = false;
+                        bool streight = false;
+                        bool kare = false;
+                        bool fullhouse = false;
+                        bool tree = false;
+                        bool twopairs = false;
+                        bool highcard = true;
+                        bool pair = false;
+
+                        int[] len = new int[2] { 1, 0 }; //Для отслеживания двух пар и фулхауса
+                        int num = 0;
+
+                        for (int i = 2; i < charArray.Length; i = i + 2)
+                        {
+                            if (charArray[i] == charArray[i - 2]) len[num]++;
+                            else
+                                if ((len[num] > 1) && (num != 1))
+                                {
+                                    num++;
+                                    len[num]++;
+                                }
+                                else if (len[num] <= 1) len[num] = 1;
+                        }
+
+
+                        //Работаем с полной комбинацией            
+
+                        //Проверка на флеш
+                        flash = true;
+                        for (int i = 3; i < charArray.Length; i = i + 2)
+                            if (charArray[i] != (charArray[1]))
+                            {
+                                flash = false;
+                                break;
+                            }
+
+                        //Проверка на стрит
+                        streight = true;
+                        for (int i = 2; i < charArray.Length; i++)
+                            if ((charArray[i - 2] - charArray[i] != 1) && (charArray[i - 2] - charArray[i] != 9))
+                            {
+                                streight = false;
+                                break;
+                            }
+
+                        if ((len[0] == 2) || (len[1] == 2)) pair = true;
+                        if ((len[0] == 3) || (len[1] == 3)) tree = true;
+                        if ((len[0] == 2) && (len[1] == 2)) twopairs = true;
+                        if (((len[0] == 2) && (len[1] == 3)) || ((len[0] == 3) && (len[1] == 2))) fullhouse = true;
+                        if (len[0] == 4) kare = true;
+
+                        if (streight && flash) { Rang =0;}
+                        if (streight) { Rang  =0;}
+                        if (flash) { Rang =0;}
+                        if (kare) { Rang =0; }
+                        if (fullhouse) { Rang =0; }
+                        if (twopairs) { Rang =0; }
+                        if (tree) { Rang =0;}
+                        if (pair) { Rang =0; }
+                        if (highcard) { Rang =0;}
+
+                        
+                    }
+                    
+                }
+                return Rang;
+            }
+            return Rang;
+
         }
 
         static List<Player> CreatePlayerList(List<User> UsersList)
@@ -253,13 +478,14 @@ namespace WebPokerServer
             int num;
             BigBlaind = ColClient;
             AllMoney = 0;
-            tekBet = 5;
+            MaxBet = 5;
             cards = new Cards();
             foreach (Player player in PlayerList) 
             {
-                player.bet += tekBet;
-                player.money -= tekBet;
-                AllMoney += tekBet;
+                player.MaxBet += MaxBet;
+                player.money -= MaxBet;
+                player.MaxBet = MaxBet;
+                AllMoney += MaxBet;
                 num = rand.Next(0, cards.Deck.Count());
                 player.card1 = cards.Deck[num];
                 cards.Deck.Remove(player.card1);
@@ -269,10 +495,10 @@ namespace WebPokerServer
             
             }
             num = BigBlaind % ColClient +1;
-            PlayerList[num].bet += tekBet;
-            PlayerList[num].money -= tekBet;
-            AllMoney += tekBet;
-            tekBet += tekBet;
+            PlayerList[num].MaxBet += MaxBet;
+            PlayerList[num].money -= MaxBet;
+            AllMoney += MaxBet;
+            MaxBet += MaxBet;
         }
 
     }

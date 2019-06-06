@@ -26,6 +26,7 @@ namespace WebPokerConsoleClient
         public bool fold = false;
         public int bet;
         public int MaxBet;
+        public int Allmoney;
         public string table = "";
     }
 }

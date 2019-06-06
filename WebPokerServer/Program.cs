@@ -1,4 +1,4 @@
-п»їusing System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,8 +40,8 @@ namespace WebPokerServer
             List<User> UsersList = new List<User>();
             List<Player> Players = new List<Player>();
 
-            //Р’РІРѕРґ С‡РёСЃР»Р° РёРіСЂРѕРєРѕРІ
-            Console.WriteLine("Р’РІРµРґРёС‚Рµ С‡РёСЃР»Рѕ РёРіСЂРѕРєРѕРІ (РѕС‚ 2 РґРѕ 5)");
+            //Ввод числа игроков
+            Console.WriteLine("Введите число игроков (от 2 до 5)");
             ColClient = Console.Read() - (byte)'0';
             if (ColClient < 2)
                 ColClient = 2;
@@ -55,15 +55,14 @@ namespace WebPokerServer
                 StartGame(UsersSocketList, ref Players);
                 SendToPlayersSecret(UsersSocketList, Players);
                 Game(UsersSocketList, ref Players);
-                GameResult(UsersSocketList, ref Players);
+                string viners = GameResult(UsersSocketList, ref Players);
 
-                //string jsonObjectString = JsonConvert.SerializeObject(Players, Formatting.Indented);
+                for (int i = 0; i < UsersSocketList.Count(); i++)
+                {
+                    JsonHandle.SendObject(UsersSocketList[i], viners);
+                }
 
-                //// С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё СЃРµСЂРёР°Р»РёР·РѕРІР°РЅРЅРѕРіРѕ РѕР±СЉРµРєС‚Р°
-                //StreamWriter Sw = new StreamWriter("Player.txt");
-                //Sw.Write(jsonObjectString);
-                //Sw.Flush();
-                //Sw.Close();
+                SavePlayerList(Players);
             }
             Console.ReadLine();
 
@@ -73,42 +72,42 @@ namespace WebPokerServer
             bool result = true;
             try
             {
-                //РєРѕРЅРµС‡РЅР°СЏ Р»РѕРєР°Р»СЊРЅР°СЏ С‚РѕС‡РєР°
+                //конечная локальная точка
                 int Port = 11006; 
                 IPHostEntry ipHost = Dns.GetHostEntry("localhost");
                 IPAddress ipAddr = ipHost.AddressList[1];
                 IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, Port);
 
-                //РЎoР·РґР°РµРј СЃРѕРєРµС‚ Ncp/Ip
+                //Сoздаем сокет Ncp/Ip
                 Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 sListener.Bind(ipEndPoint);
                 sListener.Listen(ColClient);
 
-                //РЎРѕРєРµС‚ РґР»СЏ Р»РѕРєР°Р»СЊРЅРѕР№ С‚РѕС‡РєРё Рё РїСЂРѕСЃР»СѓС€РёРІР°РЅРёРµ РІС…РѕРґСЏС‰РёС… СЃРѕРєРµС‚РѕРІ
+                //Сокет для локальной точки и прослушивание входящих сокетов
                 UsersSockets = new List<Socket>();
                 Users = new List<User>();
 
                 //tiemer
                 Thread thread1= new Thread(ListnerTimer);
                 thread1.IsBackground = true;
-                thread1.Start(sListener); //Р·Р°РїСѓСЃРєР°РµРј 
+                thread1.Start(sListener); //запускаем 
                 while ((UsersSockets.Count() < ColClient))
                 {
 
                     //!!!
-                    Console.WriteLine("РћР¶РёРґР°РµРј СЃРѕРµРґРёРЅРµРЅРёСЏ С‡РµСЂРµР· {0}", ipEndPoint);
+                    Console.WriteLine("Ожидаем соединения через {0}", ipEndPoint);
 
-                    //РћР¶РёРґР°РµРј СЃРѕРµРґРёРЅРµРЅРёСЏ
+                    //Ожидаем соединения
                     Socket handler = sListener.Accept();
 
 
-                    //РѕР±С‰Р°РµРјСЃСЏ СЃ РєР»РёРµРЅС‚РѕРј
+                    //общаемся с клиентом
                     Users.Add( JsonConvert.DeserializeObject<User>(JsonHandle.ReciveString(handler)));
 
                     ///!!!
                     //Console.WriteLine("Login {0}", user.login);
 
-                    //РћС‚РІРµС‡Р°РµРј
+                    //Отвечаем
                     Port++;
                     JsonHandle.SendObject(handler, Port);
                     ipEndPoint = new IPEndPoint(ipAddr, Port);
@@ -117,10 +116,10 @@ namespace WebPokerServer
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
 
-                    //РЎoР·РґР°РµРј СЃРѕРєРµС‚ Tcp/Ip
+                    //Сoздаем сокет Tcp/Ip
                     Socket UserSender = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-                    //РЎРѕРєРµС‚ РїРѕРґРєР»СЋС‡РµРЅРёРµ
+                    //Сокет подключение
                     try
                     {
                         UserSender.Connect(ipEndPoint);
@@ -137,7 +136,7 @@ namespace WebPokerServer
                 sListener.Close();
                 sListener = null;
 
-                //РїСЂРѕРІРµСЂРєР° РЅР° С‡РёСЃР»Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+                //проверка на число пользователей
                 if (UsersSockets.Count() < 2)
                 { 
                     result = false; 
@@ -156,14 +155,14 @@ namespace WebPokerServer
         {
             string jsonObjectString = JsonConvert.SerializeObject(PlayerList, Formatting.Indented);
 
-            // С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё СЃРµСЂРёР°Р»РёР·РѕРІР°РЅРЅРѕРіРѕ РѕР±СЉРµРєС‚Р°
+            // файл для записи сериализованного объекта
             StreamWriter Sw = new StreamWriter("PlayerTmp.json");
             Sw.Write(jsonObjectString);
             Sw.Flush();
             Sw.Close();
             for (int i = 0; i < UsersSockets.Count(); i++)
             {
-                // РґРµСЃРµСЂРёР°Р»РёР·Р°С†РёСЏ РёР· С„Р°Р№Р»Р°
+                // десериализация из файла
                 StreamReader Sr = new StreamReader("PlayerTmp.json");
                 string jsonObject = Sr.ReadToEnd();
                 List<Player> SendList = JsonConvert.DeserializeObject<List<Player>>(jsonObject);
@@ -204,46 +203,46 @@ namespace WebPokerServer
                         switch (pokerAction)
                         {
                             case TPokerAction.Check:
-                                PlayerList[i].money = PlayerList[i].money + PlayerList[i].MaxBet - MaxBet;
+                                PlayerList[i].money = PlayerList[i].money + PlayerList[i].bet - MaxBet;
                                 if (PlayerList[i].money > 0)
                                 {
-                                    AllMoney = AllMoney - PlayerList[i].MaxBet + MaxBet;
-                                    PlayerList[i].MaxBet = MaxBet;
+                                    AllMoney = AllMoney - PlayerList[i].bet + MaxBet;
+                                    PlayerList[i].bet = MaxBet;
                                 }
                                 else
                                 {
-                                    AllMoney = AllMoney - PlayerList[i].MaxBet + MaxBet + PlayerList[i].money;
-                                    PlayerList[i].MaxBet = MaxBet + PlayerList[i].money;
+                                    AllMoney = AllMoney - PlayerList[i].bet + MaxBet + PlayerList[i].money;
+                                    PlayerList[i].bet = MaxBet + PlayerList[i].money;
                                     PlayerList[i].money = 0;
                                 }
                                 break;
                             case TPokerAction.Rais:
                                 int DopBet = JsonConvert.DeserializeObject<int>(JsonHandle.ReciveString(UsersSockets[i]));
 
-                                if (PlayerList[i].MaxBet + DopBet < MaxBet)
-                                { DopBet = MaxBet - PlayerList[i].MaxBet; }
+                                if (PlayerList[i].bet + DopBet < MaxBet)
+                                { DopBet = MaxBet - PlayerList[i].bet; }
                                 PlayerList[i].money = PlayerList[i].money - DopBet;
                                 if (PlayerList[i].money > 0)
                                 {
                                     AllMoney += DopBet;
-                                    PlayerList[i].MaxBet += DopBet;
+                                    PlayerList[i].bet += DopBet;
 
                                 }
                                 else
                                 {
                                     AllMoney = AllMoney + DopBet + PlayerList[i].money;
-                                    PlayerList[i].MaxBet = PlayerList[i].MaxBet + DopBet + PlayerList[i].money;
+                                    PlayerList[i].bet = PlayerList[i].bet + DopBet + PlayerList[i].money;
                                     PlayerList[i].money = 0;
                                 }
-                                if (MaxBet < PlayerList[i].MaxBet)
+                                if (MaxBet < PlayerList[i].bet)
                                 {
-                                    MaxBet = PlayerList[i].MaxBet;
+                                    MaxBet = PlayerList[i].bet;
                                     raise = true;
                                 }
                                 break;
                             default:
                                 PlayerList[i].fold = true;
-                                PlayerList[i].MaxBet = 0;
+                                PlayerList[i].bet = 0;
                                 break;
                         }
                         PlayerList[i].MaxBet = MaxBet;
@@ -254,7 +253,7 @@ namespace WebPokerServer
                 }
 
                 //new circle
-                raise = raise && (PlayerList[0].MaxBet != MaxBet);
+                raise = raise && (PlayerList[0].bet != MaxBet);
                 stop = ((PlayerList[0].table.Length == 10) && (raise == false));
                 if ((raise == false) && !stop)
                 {
@@ -288,154 +287,273 @@ namespace WebPokerServer
         }
 
 
-
-    public enum Ranks
-    {
-        A = 14, K = 13, Q = 12, J = 11,
-        Ten = 10, Nine = 9, Eight = 8, Seven = 7, Six = 6,
-        Five = 5, Four = 4, Tree = 3, Two = 2
-    }
-    public enum Suits { Hearts, Diamonds, Clubs, Spades }
     public enum Combinations
     {
         Uknown = 0, HighCard = 1, Pair = 2, TwoPairs = 3, Tree = 4,
         Streight = 5, Flash = 6, FullHouse = 7, Kare = 8, StreightFlash = 9
     }
 
-        static int GameResult(List<Socket> UsersSockets, ref List<Player> PlayerList)
+        static string GameResult(List<Socket> UsersSockets, ref List<Player> PlayerList)
         {
-            string winers = String.Empty;
-            int Rang = 0;
+            Combinations Rang = 0;
             List<int> HeightList = new List<int>();
-            for (int l = 0; l < PlayerList.Count; l = l+ 1)
+            Player Win = new Player();
+            string Viner = String.Empty;
+            //string Viners = String.Empty; 
+
+            for (int l = 0; l < PlayerList.Count; l = l + 1)
             {
-                string bufStr;
-                bufStr = PlayerList[l].table + PlayerList[l].card1 + PlayerList[l].card2;
-                for (int t = 0; t < 12; t = t+2)
+
+                if (!PlayerList[l].fold)
                 {
 
-                    for (int o = t+2; o<12; o = o+2)
+                    string bufStr, TempString;
+                    bufStr = PlayerList[l].table + PlayerList[l].card1 + PlayerList[l].card2;
+                    for (int t = 0; t < bufStr.Length; t = t + 2)
                     {
-                        bufStr = bufStr.Substring(0, t) + bufStr.Substring(t + 2, t + o) + bufStr.Substring(t + o +2, bufStr.Length - t -o -2);
 
-
-
-                        Char[] charArray = bufStr.ToCharArray();
-                        for (int j = 0; j < charArray.Length; j++)
+                        for (int o = t + 2; o + 2 + t < bufStr.Length; o = o + 2)
                         {
-                            if (charArray[j].Equals('T'))
-                                charArray[j] = (char)59;
-                            if (charArray[j].Equals('J'))
-                                charArray[j] = (char)60;
-                            if (charArray[j].Equals('Q'))
-                                charArray[j] = (char)61;
-                            if (charArray[j].Equals('K'))
-                                charArray[j] = (char)62;
-                            if (charArray[j].Equals('A'))
-                                charArray[j] = (char)63;
-                        }
-                        for (int j = 0; j < charArray.Length; j = j + 2)
-                        {
-                            for (int k = 0; k < charArray.Length - 3; k = k + 2)
+                            TempString = bufStr.Substring(0, t) + bufStr.Substring(t + 2, t + o - t - 2) + bufStr.Substring(t + 2 + o, bufStr.Length - t - o - 2);
+
+
+
+                            Char[] charArray = TempString.ToCharArray();
+                            for (int j = 0; j < charArray.Length; j++)
                             {
-                                if (charArray[k] > charArray[k + 2])
+                                if (charArray[j].Equals('T'))
+                                    charArray[j] = (char)59;
+                                if (charArray[j].Equals('J'))
+                                    charArray[j] = (char)60;
+                                if (charArray[j].Equals('Q'))
+                                    charArray[j] = (char)61;
+                                if (charArray[j].Equals('K'))
+                                    charArray[j] = (char)62;
+                                if (charArray[j].Equals('A'))
+                                    charArray[j] = (char)63;
+                            }
+                            for (int j = 0; j < charArray.Length; j = j + 2)
+                            {
+                                for (int k = 0; k < charArray.Length - 3; k = k + 2)
                                 {
-                                    Char buf = charArray[k + 2];
-                                    charArray[k + 2] = charArray[k];
-                                    charArray[k] = buf;
-                                    buf = charArray[k + 1];
-                                    charArray[k + 1] = charArray[k + 3];
-                                    charArray[k + 3] = buf;
+                                    if (charArray[k] > charArray[k + 2])
+                                    {
+                                        Char buf = charArray[k + 2];
+                                        charArray[k + 2] = charArray[k];
+                                        charArray[k] = buf;
+                                        buf = charArray[k + 1];
+                                        charArray[k + 1] = charArray[k + 3];
+                                        charArray[k + 3] = buf;
+                                    }
+
+
                                 }
 
-
                             }
 
-                        }
+
+                            bool flash = false;
+                            bool streight = false;
+                            bool kare = false;
+                            bool fullhouse = false;
+                            bool tree = false;
+                            bool twopairs = false;
+                            bool highcard = true;
+                            bool pair = false;
+
+                            int[] len = new int[2] { 1, 0 }; //Для отслеживания двух пар и фулхауса
+                            int num = 0;
+
+                            for (int i = 2; i < charArray.Length; i = i + 2)
+                            {
+                                if (charArray[i] == charArray[i - 2]) len[num]++;
+                                else
+                                    if ((len[num] > 1) && (num != 1))
+                                    {
+                                        num++;
+                                        len[num]++;
+                                    }
+                                    else if (len[num] <= 1) len[num] = 1;
+                            }
 
 
-                        bool flash = false;
-                        bool streight = false;
-                        bool kare = false;
-                        bool fullhouse = false;
-                        bool tree = false;
-                        bool twopairs = false;
-                        bool highcard = true;
-                        bool pair = false;
+                            //Работаем с полной комбинацией            
 
-                        int[] len = new int[2] { 1, 0 }; //Р”Р»СЏ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ РґРІСѓС… РїР°СЂ Рё С„СѓР»С…Р°СѓСЃР°
-                        int num = 0;
-
-                        for (int i = 2; i < charArray.Length; i = i + 2)
-                        {
-                            if (charArray[i] == charArray[i - 2]) len[num]++;
-                            else
-                                if ((len[num] > 1) && (num != 1))
+                            //Проверка на флеш
+                            flash = true;
+                            for (int i = 3; i < charArray.Length; i = i + 2)
+                                if (charArray[i] != (charArray[1]))
                                 {
-                                    num++;
-                                    len[num]++;
+                                    flash = false;
+                                    break;
                                 }
-                                else if (len[num] <= 1) len[num] = 1;
+
+                            //Проверка на стрит
+                            streight = true;
+                            for (int i = 2; i < charArray.Length; i++)
+                                if ((charArray[i - 2] - charArray[i] != 1) && (charArray[i - 2] - charArray[i] != 9))
+                                {
+                                    streight = false;
+                                    break;
+                                }
+
+                            if ((len[0] == 2) || (len[1] == 2)) pair = true;
+                            if ((len[0] == 3) || (len[1] == 3)) tree = true;
+                            if ((len[0] == 2) && (len[1] == 2)) twopairs = true;
+                            if (((len[0] == 2) && (len[1] == 3)) || ((len[0] == 3) && (len[1] == 2))) fullhouse = true;
+                            if (len[0] == 4) kare = true;
+
+
+
+                            if (streight && flash)
+                            {
+                                if (Rang < (Combinations)9)
+                                {
+                                    Rang = (Combinations)9;
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Win = PlayerList[l];
+                                }
+                            }
+                            if (streight)
+                            {
+                                if (Rang < (Combinations)5)
+                                {
+                                    Rang = (Combinations)5;
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Win = PlayerList[l];
+                                }
+                            }
+                            if (flash)
+                            {
+                                if (Rang < (Combinations)6)
+                                {
+                                    Rang = (Combinations)6;
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Win = PlayerList[l];
+                                }
+                            }
+                            if (kare)
+                            {
+                                if (Rang < (Combinations)8)
+                                {
+                                    Rang = (Combinations)8;
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Win = PlayerList[l];
+                                }
+                            }
+                            if (fullhouse)
+                            {
+                                if (Rang < (Combinations)7)
+                                {
+                                    Rang = (Combinations)7;
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Win = PlayerList[l];
+                                }
+                            }
+                            if (twopairs)
+                            {
+                                if (Rang < (Combinations)3)
+                                {
+                                    Rang = (Combinations)3;
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Win = PlayerList[l];
+                                }
+                            }
+                            if (tree)
+                            {
+                                if (Rang < (Combinations)4)
+                                {
+                                    Rang = (Combinations)4;
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Win = PlayerList[l];
+                                }
+                            }
+                            if (pair)
+                            {
+                                if (Rang < (Combinations)2)
+                                {
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Rang = (Combinations)2;
+                                    Win = PlayerList[l];
+                                }
+                            }
+                            if (highcard)
+                            {
+                                if (Rang < (Combinations)1)
+                                {
+                                    Rang = (Combinations)1;
+                                    Viner = TempString + "_" + PlayerList[l].login;
+                                    Win = PlayerList[l];
+                                }
+                            }
+
+
+
                         }
 
-
-                        //Р Р°Р±РѕС‚Р°РµРј СЃ РїРѕР»РЅРѕР№ РєРѕРјР±РёРЅР°С†РёРµР№            
-
-                        //РџСЂРѕРІРµСЂРєР° РЅР° С„Р»РµС€
-                        flash = true;
-                        for (int i = 3; i < charArray.Length; i = i + 2)
-                            if (charArray[i] != (charArray[1]))
-                            {
-                                flash = false;
-                                break;
-                            }
-
-                        //РџСЂРѕРІРµСЂРєР° РЅР° СЃС‚СЂРёС‚
-                        streight = true;
-                        for (int i = 2; i < charArray.Length; i++)
-                            if ((charArray[i - 2] - charArray[i] != 1) && (charArray[i - 2] - charArray[i] != 9))
-                            {
-                                streight = false;
-                                break;
-                            }
-
-                        if ((len[0] == 2) || (len[1] == 2)) pair = true;
-                        if ((len[0] == 3) || (len[1] == 3)) tree = true;
-                        if ((len[0] == 2) && (len[1] == 2)) twopairs = true;
-                        if (((len[0] == 2) && (len[1] == 3)) || ((len[0] == 3) && (len[1] == 2))) fullhouse = true;
-                        if (len[0] == 4) kare = true;
-
-                        if (streight && flash) { Rang =9;}
-                        if (streight) { Rang  =5;}
-                        if (flash) { Rang =6;}
-                        if (kare) { Rang =8; }
-                        if (fullhouse) { Rang =7; }
-                        if (twopairs) { Rang =3; }
-                        if (tree) { Rang =4;}
-                        if (pair) { Rang =2; }
-                        if (highcard) { Rang =1;}
-
-                        
                     }
-                    
                 }
-                return Rang;
             }
-            return Rang;
-
+            Win.money += AllMoney;
+            Win.fold = false;
+            return Viner + "-" + Rang.ToString();
         }
 
-        static List<Player> CreatePlayerList(List<User> UsersList)
+        static void SavePlayerList(List<Player> NewPlayerList)
         {
             string jsonObject = String.Empty;
 
-            // РґРµСЃРµСЂРёР°Р»РёР·Р°С†РёСЏ РёР· С„Р°Р№Р»Р°
+            // десериализация из файла
             StreamReader Sr = new StreamReader("Player.txt");
             jsonObject = Sr.ReadToEnd();
             List<Player> allPlayer = JsonConvert.DeserializeObject<List<Player>>(jsonObject);
             Sr.Close();
             //allPlayer = new List<Player>();
-            //С‡С‚РµРЅРёРµ РїСЂРѕС„РёР»РµР№
+            //чтение профилей
+
+            bool NotInPlayer;
+            foreach (Player newPlayer in NewPlayerList)
+            {
+                newPlayer.fold = false;
+                newPlayer.MaxBet= 0;
+                newPlayer.Allmoney = 0;
+
+                NotInPlayer = true;
+                for (int i = 0; i < allPlayer.Count; i++)
+                {
+                    if (newPlayer.login == allPlayer[i].login)
+                    {
+                        allPlayer[i] = newPlayer;
+                        NotInPlayer = false;
+                    }
+                }
+                if (NotInPlayer)
+                {
+                    allPlayer.Add(newPlayer);
+                }
+            }
+            string jsonObjectString = JsonConvert.SerializeObject(allPlayer, Formatting.Indented);
+
+            // файл для записи сериализованного объекта
+            StreamWriter Sw = new StreamWriter("Player.txt");
+            Sw.Write(jsonObjectString);
+            Sw.Flush();
+            Sw.Close();
+
+
+        } 
+
+        static List<Player> CreatePlayerList(List<User> UsersList)
+        {
+            string jsonObject = String.Empty;
+
+            // десериализация из файла
+            StreamReader Sr = new StreamReader("Player.txt");
+            jsonObject = Sr.ReadToEnd();
+            List<Player> allPlayer = JsonConvert.DeserializeObject<List<Player>>(jsonObject);
+            Sr.Close();
+            //allPlayer = new List<Player>();
+            //чтение профилей
             List<Player> PlayersList = new List<Player>();
 
             bool NotInPlayer;
@@ -462,7 +580,7 @@ namespace WebPokerServer
             }
             string jsonObjectString = JsonConvert.SerializeObject(allPlayer, Formatting.Indented);
 
-            // С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё СЃРµСЂРёР°Р»РёР·РѕРІР°РЅРЅРѕРіРѕ РѕР±СЉРµРєС‚Р°
+            // файл для записи сериализованного объекта
             StreamWriter Sw = new StreamWriter("Player.txt");
             Sw.Write(jsonObjectString);
             Sw.Flush();
@@ -482,9 +600,13 @@ namespace WebPokerServer
             cards = new Cards();
             foreach (Player player in PlayerList) 
             {
-                player.MaxBet += MaxBet;
+                if (player.money < 10)
+                { player.money = 100; }
+                player.fold = false;
+                player.bet = MaxBet; 
                 player.money -= MaxBet;
                 player.MaxBet = MaxBet;
+                player.table = "";
                 AllMoney += MaxBet;
                 num = rand.Next(0, cards.Deck.Count());
                 player.card1 = cards.Deck[num];
@@ -495,11 +617,11 @@ namespace WebPokerServer
             
             }
             num = BigBlaind % ColClient +1;
-            PlayerList[num].MaxBet += MaxBet;
+            PlayerList[num].bet += MaxBet;
             PlayerList[num].money -= MaxBet;
             AllMoney += MaxBet;
             MaxBet += MaxBet;
         }
 
     }
-}
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

@@ -405,15 +405,15 @@ namespace WebPokerServer
                         if (((len[0] == 2) && (len[1] == 3)) || ((len[0] == 3) && (len[1] == 2))) fullhouse = true;
                         if (len[0] == 4) kare = true;
 
-                        if (streight && flash) { Rang =0;}
-                        if (streight) { Rang  =0;}
-                        if (flash) { Rang =0;}
-                        if (kare) { Rang =0; }
-                        if (fullhouse) { Rang =0; }
-                        if (twopairs) { Rang =0; }
-                        if (tree) { Rang =0;}
-                        if (pair) { Rang =0; }
-                        if (highcard) { Rang =0;}
+                        if (streight && flash) { Rang =9;}
+                        if (streight) { Rang  =5;}
+                        if (flash) { Rang =6;}
+                        if (kare) { Rang =8; }
+                        if (fullhouse) { Rang =7; }
+                        if (twopairs) { Rang =3; }
+                        if (tree) { Rang =4;}
+                        if (pair) { Rang =2; }
+                        if (highcard) { Rang =1;}
 
                         
                     }

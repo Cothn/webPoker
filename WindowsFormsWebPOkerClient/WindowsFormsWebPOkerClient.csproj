@@ -55,11 +55,13 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="GoToServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serializer.cs" />
     <Compile Include="User.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -68,6 +70,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -78,9 +81,73 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Resources\active.png" />
+    <None Include="Resources\Rubashka.png" />
+    <None Include="Resources\table.jpg" />
+    <None Include="Resources\tablebank.png" />
+    <None Include="Resources\waiting.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\NewFolder1\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\21.jpg" />
+    <Content Include="Resources\22.jpg" />
+    <Content Include="Resources\23.jpg" />
+    <Content Include="Resources\24.jpg" />
+    <Content Include="Resources\31.jpg" />
+    <Content Include="Resources\32.jpg" />
+    <Content Include="Resources\33.jpg" />
+    <Content Include="Resources\34.jpg" />
+    <Content Include="Resources\41.jpg" />
+    <Content Include="Resources\42.jpg" />
+    <Content Include="Resources\43.jpg" />
+    <Content Include="Resources\44.jpg" />
+    <Content Include="Resources\51.jpg" />
+    <Content Include="Resources\52.jpg" />
+    <Content Include="Resources\53.jpg" />
+    <Content Include="Resources\54.jpg" />
+    <Content Include="Resources\61.jpg" />
+    <Content Include="Resources\62.jpg" />
+    <Content Include="Resources\63.jpg" />
+    <Content Include="Resources\64.jpg" />
+    <Content Include="Resources\71.jpg" />
+    <Content Include="Resources\72.jpg" />
+    <Content Include="Resources\73.jpg" />
+    <Content Include="Resources\74.jpg" />
+    <Content Include="Resources\81.jpg" />
+    <Content Include="Resources\82.jpg" />
+    <Content Include="Resources\83.jpg" />
+    <Content Include="Resources\84.jpg" />
+    <Content Include="Resources\91.jpg" />
+    <Content Include="Resources\92.jpg" />
+    <Content Include="Resources\93.jpg" />
+    <Content Include="Resources\94.jpg" />
+    <Content Include="Resources\A1.jpg" />
+    <Content Include="Resources\A2.jpg" />
+    <Content Include="Resources\A3.jpg" />
+    <Content Include="Resources\A4.jpg" />
+    <Content Include="Resources\bank.png" />
+    <Content Include="Resources\diller.png" />
+    <Content Include="Resources\J1.jpg" />
+    <Content Include="Resources\J2.jpg" />
+    <Content Include="Resources\J3.jpg" />
+    <Content Include="Resources\J4.jpg" />
+    <Content Include="Resources\K1.jpg" />
+    <Content Include="Resources\K2.jpg" />
+    <Content Include="Resources\K3.jpg" />
+    <Content Include="Resources\K4.jpg" />
+    <Content Include="Resources\Q1.jpg" />
+    <Content Include="Resources\Q2.jpg" />
+    <Content Include="Resources\Q3.jpg" />
+    <Content Include="Resources\Q4.jpg" />
+    <Content Include="Resources\T1.jpg" />
+    <Content Include="Resources\T2.jpg" />
+    <Content Include="Resources\T3.jpg" />
+    <Content Include="Resources\T4.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

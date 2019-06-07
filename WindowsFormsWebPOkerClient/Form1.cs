@@ -85,6 +85,10 @@ namespace WindowsFormsWebPOkerClient
                 label5
             };
 
+            try
+
+            {
+
                 //int quit = 0;
                 //11006
                 //конечная локальная точка
@@ -105,7 +109,7 @@ namespace WindowsFormsWebPOkerClient
                 //слушаем
                 port = (int)JsonConvert.DeserializeObject<int>(JsonHandle.ReciveString(sender));
 
-                LOgi.Items.Add( "Connect to port:" + port.ToString());
+                LOgi.Items.Add("Connect to port:" + port.ToString());
 
                 //close
                 sender.Disconnect(true);
@@ -135,7 +139,7 @@ namespace WindowsFormsWebPOkerClient
                     //BeginInvoke(new MyDelegate(IzmeniUserPicth), "", i);
                     UserPicth[i].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\active.png");
                     //BeginInvoke(new MyDelegate(IzmeniLabel), playerList[i].ToString(), i);
-                    namesLabel[i].Text  = playerList[i].name;
+                    namesLabel[i].Text = playerList[i].name;
                     if (playerList[i].login == login)
                     {
                         gamerNumber = i;
@@ -143,12 +147,18 @@ namespace WindowsFormsWebPOkerClient
                     }
                 }
 
-               // LOgi.Text = LOgi.Text + "D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].card1 + ".jpg" + "Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber].money + "\n";
-                UserCard[gamerNumber * 2].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\"+ playerList[gamerNumber].card1 +".jpg");
-                UserCard[gamerNumber * 2+1].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].card2 + ".jpg");
+                // LOgi.Text = LOgi.Text + "D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].card1 + ".jpg" + "Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber].money + "\n";
+                UserCard[gamerNumber * 2].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].card1 + ".jpg");
+                UserCard[gamerNumber * 2 + 1].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].card2 + ".jpg");
 
 
                 return handler;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return null;
         }
 
         private void SendAction(TPokerAction PokerAction)
@@ -218,7 +228,12 @@ namespace WindowsFormsWebPOkerClient
             Check_CallButton.Visible = false;
             FoldButton.Visible = false;
             RaiseButton.Visible = false;
-
+            card1.BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\Rubashka.png");
+            card2.BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\Rubashka.png");
+            card3.BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\Rubashka.png");
+            card4.BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\Rubashka.png");
+            card5.BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\Rubashka.png");
+            
             // UserListener.Close();
             //UserListener = null;
             //Thread.Sleep(100);
@@ -229,19 +244,26 @@ namespace WindowsFormsWebPOkerClient
 
         private void SstartButt_Click(object sender, EventArgs e)
         {
-            SstartButt.Visible = false;
-            LoginBox.Visible = false;
-            PortBox.Visible = false;
-            NameBox.Visible = false;
-            label8.Visible = false;
-            label9.Visible = false;
-            label10.Visible = false;
-            Check_CallButton.Visible = true;
-            FoldButton.Visible = true;
-            RaiseButton.Visible = true;
-            handler = Go(NameBox.Text, LoginBox.Text, int.Parse(PortBox.Text));
 
-            RefreshMessage();
+            handler = Go(NameBox.Text, LoginBox.Text, int.Parse(PortBox.Text));
+            if (handler != null)
+            {
+                SstartButt.Visible = false;
+                LoginBox.Visible = false;
+                PortBox.Visible = false;
+                NameBox.Visible = false;
+                label8.Visible = false;
+                label9.Visible = false;
+                label10.Visible = false;
+                Check_CallButton.Visible = true;
+                FoldButton.Visible = true;
+                RaiseButton.Visible = true;
+                RefreshMessage();
+            }
+            else
+            {
+                MessageBox.Show("Сервер недоступен");
+            }
             //// КОД 1 - здесь код до запуска потока
             //Thread potok1 = new Thread(RefreshMessage); // создание отдельного потока
             //potok1.Start(); // запуск потока

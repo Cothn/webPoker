@@ -28,7 +28,7 @@ namespace WebPokerConsoleClient
                     //конечная локальная точка
                     IPHostEntry ipHost = Dns.GetHostEntry("localhost");
                     IPAddress ipAddr = ipHost.AddressList[1];
-                    IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11006);
+                    IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11020);
 
                     //Сoздаем сокет Tcp/Ip
                     Socket sender = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);

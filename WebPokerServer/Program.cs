@@ -280,7 +280,7 @@ namespace WebPokerServer
             for (int i = 0; i < UsersSockets.Count(); i++)
             {
                 JsonHandle.SendObject(UsersSockets[i], false); //stop
-                Thread.Sleep(100);
+                Thread.Sleep(200);
                 JsonHandle.SendObject(UsersSockets[i], stop);
             }
 

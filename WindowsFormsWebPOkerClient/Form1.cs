@@ -17,16 +17,29 @@ namespace WindowsFormsWebPOkerClient
 {
     public partial class MainForm : Form
     {
-        //public delegate void MyDelegate(string iText, int i); // для доступа к элементам из другого потока с передачей параметров
-        //public void IzmeniLabel(string iText, int i)
-        //{
+        public delegate void MyDelegate(string iText, int i); // для доступа к элементам из другого потока с передачей параметров
+        public void IzmeniTabel(string iText, int i)
+        {
 
-        //    
+                List<PictureBox> TableCard = new List<PictureBox>() 
+                {
+                card1,
+                card2,
+                card3,
+                card4,
+                card5
+                };
 
-        //}
+                TableCard[i].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\"+iText+".jpg");
+
+        }
+        public void IzmeniLOgi(string iText, int i)
+        {
+            LOgi.Items.Add(iText + "\n");
+        }
 
 
-
+        Socket handler;
         int gamerNumber = 0;
         List<Player> playerList;
         public enum TPokerAction { Check = 0, Rais = 1, Fold = 2 };
@@ -40,16 +53,8 @@ namespace WindowsFormsWebPOkerClient
 
         //const string login = "Ami";
         //const string name = "Ami";
-        public  void Go(string name, string login, int port)
+        public  Socket Go(string name, string login, int port)
         {
-            List<PictureBox> TableCard = new List<PictureBox>() 
-            {
-                card1,
-                card2,
-                card3,
-                card4,
-                card5
-            };
             List<PictureBox> UserCard = new List<PictureBox>() 
             {
                 UserCard10,
@@ -100,7 +105,7 @@ namespace WindowsFormsWebPOkerClient
                 //слушаем
                 port = (int)JsonConvert.DeserializeObject<int>(JsonHandle.ReciveString(sender));
 
-                LOgi.Text = LOgi.Text + "Connect to port:" + port.ToString();
+                LOgi.Items.Add( "Connect to port:" + port.ToString());
 
                 //close
                 sender.Disconnect(true);
@@ -126,7 +131,7 @@ namespace WindowsFormsWebPOkerClient
                 for (int i = 0; i < playerList.Count(); i++)
                 {
                     //BeginInvoke(new MyDelegate(IzmeniLogi), );
-                    LOgi.Text = LOgi.Text + " Add player: " + playerList[i].login;
+                    LOgi.Items.Add(" Add player: " + playerList[i].login);
                     //BeginInvoke(new MyDelegate(IzmeniUserPicth), "", i);
                     UserPicth[i].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\active.png");
                     //BeginInvoke(new MyDelegate(IzmeniLabel), playerList[i].ToString(), i);
@@ -138,41 +143,45 @@ namespace WindowsFormsWebPOkerClient
                     }
                 }
 
-                LOgi.Text = LOgi.Text + "D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].card1 + ".jpg" + "Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber].money + "\n";
-                UserCard[gamerNumber * 2].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\"+ playerList[gamerNumber].card2 +".jpg");
+               // LOgi.Text = LOgi.Text + "D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].card1 + ".jpg" + "Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber].money + "\n";
+                UserCard[gamerNumber * 2].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\"+ playerList[gamerNumber].card1 +".jpg");
                 UserCard[gamerNumber * 2+1].BackgroundImage = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].card2 + ".jpg");
+
+
+                return handler;
         }
 
-        //private void SendAction(Socket handler)
-        //{
-
-        //    JsonHandle.SendObject(handler, PokerAction);
-        //    if (PokerAction == TPokerAction.Rais)
-        //    {
-        //        Console.WriteLine("Введите ставку :");
-        //        string buf = Console.ReadLine();
-        //        int bet = int.Parse(buf);
-        //        JsonHandle.SendObject(handler, bet);
-        //    }
-        //}
-        //private bool RefreshMessage(Socket handler, List<PictureBox> TableCard)
-        //{
-        //    bool stop;
-        //    while (JsonConvert.DeserializeObject<bool>(JsonHandle.ReciveString(handler))) //refresh
-        //    {
-        //        playerList = (List<Player>)JsonConvert.DeserializeObject<List<Player>>(JsonHandle.ReciveString(handler));
-        //        BankLabel.Text = playerList[0].Allmoney.ToString();
-        //        LOgi.Text = LOgi.Text + "Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber].money + "  _Table_  " + playerList[gamerNumber].table + "\n";
-        //        for (int i = 0; i < playerList[gamerNumber].table.Length; i = i + 2)
-        //        {
-        //            TableCard[i / 2].Image = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" + playerList[gamerNumber].table.Substring(i, 2) + ".png");
-        //        }
-        //    }
-        //    stop = JsonConvert.DeserializeObject<bool>(JsonHandle.ReciveString(handler));
-        //    return stop;
-        //}
-        private void label7_Click(object sender, EventArgs e)
+        private void SendAction(TPokerAction PokerAction)
         {
+
+            JsonHandle.SendObject(handler, PokerAction);
+            if (PokerAction == TPokerAction.Rais)
+            {
+
+                int bet = trackBarRaise.Value;
+                //Thread.Sleep(200);
+                JsonHandle.SendObject(handler, bet);
+            }
+        }
+        private void RefreshMessage()
+        {
+
+            while (JsonConvert.DeserializeObject<bool>(JsonHandle.ReciveString(handler))) //refresh
+            {
+                playerList = (List<Player>)JsonConvert.DeserializeObject<List<Player>>(JsonHandle.ReciveString(handler));
+                //BankLabel.Text = playerList[0].Allmoney.ToString();
+
+                string Text ="Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", банк:" + playerList[gamerNumber].Allmoney + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber].money + "  _Table_  " + playerList[gamerNumber].table + "\n";
+                BeginInvoke(new MyDelegate(IzmeniLOgi), Text, 0);
+               Text = "Карта1:" + playerList[gamerNumber].card1 + ", Карта2:" + playerList[gamerNumber].card2 + ", банк:" + playerList[gamerNumber].Allmoney + ", Ставка:" + playerList[gamerNumber].bet + ", Остаток:" + playerList[gamerNumber].money + "  _Table_  " + playerList[gamerNumber].table + "\n";
+               
+                for (int i = 0; i < playerList[gamerNumber].table.Length; i = i + 2)
+                {
+                    BeginInvoke(new MyDelegate(IzmeniTabel), playerList[gamerNumber].table.Substring(i, 2), i/2); 
+
+                    //TableCard[i / 2].Image = Image.FromFile("D:\\RepositHub\\webPoker\\WindowsFormsWebPOkerClient\\Resources\\" +  + ".png");
+                }
+            }
 
         }
 
@@ -181,100 +190,42 @@ namespace WindowsFormsWebPOkerClient
             //Go("ami", "ami", 11006);
         }
 
-        private void panel2_Paint(object sender, PaintEventArgs e)
-        {
 
+        private void EndGame(string winer)
+        {
+            LOgi.Items.Add( "Winer:" + winer);
+            string WinerLogin = winer.Substring(winer.IndexOf('_')+1, winer.IndexOf('-') -winer.IndexOf('_')-1);
+            for (int i = 0; i < playerList.Count; i++)
+            {
+                if (playerList[i].login == WinerLogin)
+                {
+                    BankLabel.Text = WinerLogin;
+                    break;
+                }
+            }
+
+            handler.Shutdown(SocketShutdown.Both);
+            handler.Close();
+            handler = null;
+
+            SstartButt.Visible = true;
+            LoginBox.Visible = true;
+            PortBox.Visible = true;
+            NameBox.Visible = true;
+            label8.Visible = true;
+            label9.Visible = true;
+            label10.Visible = true;
+            Check_CallButton.Visible = false;
+            FoldButton.Visible = false;
+            RaiseButton.Visible = false;
+
+            // UserListener.Close();
+            //UserListener = null;
+            //Thread.Sleep(100);
         }
 
-        private void pictureBox2_Click(object sender, EventArgs e)
-        {
-        
-        }
 
-        private void pictureBox15_Click(object sender, EventArgs e)
-        {
-        
-        }
 
-        private void pictureBox16_Click(object sender, EventArgs e)
-        {
-        
-        }
-
-        private void pictureBox12_Click(object sender, EventArgs e)
-        {
-        
-        }
-
-        private void pbMyCard1_Click(object sender, EventArgs e)
-        {
-        
-        }
-
-        private void pictureBox14_Click(object sender, EventArgs e)
-        {
-        
-        }
-
-        private void pictureBox13_Click(object sender, EventArgs e)
-        {
-        
-        }
-
-        private void pictureBox20_Click(object sender, EventArgs e)
-        {
-        
-        }
-
-        private void pictureBox19_Click(object sender, EventArgs e)
-        {
-        
-        }
-
-        private void pictureBox18_Click(object sender, EventArgs e)
-        {
-        
-        }
-
-        private void FoldButton_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        //private void afteraction(Socket handler, List<PictureBox> TableCard)
-        //{
-        //               //Console.WriteLine( );
-        //            bool stop = RefreshMessage(handler, TableCard);
-        //            while (!stop)
-        //            {
-        //                SendAction(handler);
-        //                stop = RefreshMessage(handler, TableCard);
-        //            }
-
-        //            string winer = JsonConvert.DeserializeObject<string>(JsonHandle.ReciveString(handler));
-        //            LOgi.Text = LOgi.Text + "Connect to port:" + winer;
-
-        //            handler.Shutdown(SocketShutdown.Both);
-        //            handler.Close();
-        //            handler = null;
-
-        //           // UserListener.Close();
-        //           //UserListener = null;
-        //            //Thread.Sleep(100);
-        //}
-
-        private void Check_CallButton_Click(object sender, EventArgs e)
-        {
-            //// КОД 1 - здесь код до запуска потока
-            //Thread potok1 = new Thread(Go); // создание отдельного потока
-            //potok1.Start(); // запуск потока
-            //// КОД 2 - здесь код после запуска первого потока
-        }
-
-        private void label8_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void SstartButt_Click(object sender, EventArgs e)
         {
@@ -288,7 +239,58 @@ namespace WindowsFormsWebPOkerClient
             Check_CallButton.Visible = true;
             FoldButton.Visible = true;
             RaiseButton.Visible = true;
-            Go(NameBox.Text, LoginBox.Text, int.Parse(PortBox.Text));
+            handler = Go(NameBox.Text, LoginBox.Text, int.Parse(PortBox.Text));
+
+            RefreshMessage();
+            //// КОД 1 - здесь код до запуска потока
+            //Thread potok1 = new Thread(RefreshMessage); // создание отдельного потока
+            //potok1.Start(); // запуск потока
+            //// КОД 2 - здесь код после запуска первого потока
+        }
+
+        private void Check_CallButton_Click(object sender, EventArgs e)
+        {
+            string str = JsonHandle.ReciveString(handler);
+            if (str == "False" || str == "false")
+            {
+                SendAction(TPokerAction.Check);
+                Thread potok1 = new Thread(RefreshMessage); // создание отдельного потока
+                potok1.Start(); // запуск потока
+            }
+            else
+            {
+                EndGame(str);
+            }
+        }
+
+        private void FoldButton_Click(object sender, EventArgs e)
+        {
+            string str = JsonHandle.ReciveString(handler);
+            if (str == "False" || str == "false")
+            {
+                SendAction(TPokerAction.Fold);
+                Thread potok1 = new Thread(RefreshMessage); // создание отдельного потока
+                potok1.Start(); // запуск потока
+            }
+            else
+            {
+                EndGame(str);
+            }
+        }
+
+        private void RaiseButton_Click(object sender, EventArgs e)
+        {
+            string str = JsonHandle.ReciveString(handler);
+            if (str == "False" || str == "false")
+            {
+                SendAction(TPokerAction.Rais);
+                Thread potok1 = new Thread(RefreshMessage); // создание отдельного потока
+                potok1.Start(); // запуск потока
+            }
+            else 
+            {
+                EndGame(str);
+            }
         }
     }
 }

@@ -38,6 +38,8 @@
             this.обАтореToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LOgi = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label10 = new System.Windows.Forms.Label();
+            this.NameBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.PortBox = new System.Windows.Forms.TextBox();
@@ -46,8 +48,6 @@
             this.RaiseButton = new System.Windows.Forms.Button();
             this.FoldButton = new System.Windows.Forms.Button();
             this.Check_CallButton = new System.Windows.Forms.Button();
-            this.labeMyRaise = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             this.trackBarRaise = new System.Windows.Forms.TrackBar();
             this.labelBank = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -64,7 +64,6 @@
             this.card5 = new System.Windows.Forms.PictureBox();
             this.card4 = new System.Windows.Forms.PictureBox();
             this.card3 = new System.Windows.Forms.PictureBox();
-            this.BankLabel = new System.Windows.Forms.Label();
             this.card2 = new System.Windows.Forms.PictureBox();
             this.card1 = new System.Windows.Forms.PictureBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -79,9 +78,8 @@
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.BankLabel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.NameBox = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
             this.menuMain.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarRaise)).BeginInit();
@@ -192,14 +190,29 @@
             this.panel1.Controls.Add(this.RaiseButton);
             this.panel1.Controls.Add(this.FoldButton);
             this.panel1.Controls.Add(this.Check_CallButton);
-            this.panel1.Controls.Add(this.labeMyRaise);
-            this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.trackBarRaise);
             this.panel1.Controls.Add(this.LOgi);
             this.panel1.Location = new System.Drawing.Point(0, 424);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(855, 147);
             this.panel1.TabIndex = 8;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(508, 105);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(35, 13);
+            this.label10.TabIndex = 16;
+            this.label10.Text = "Name";
+            // 
+            // NameBox
+            // 
+            this.NameBox.Location = new System.Drawing.Point(550, 105);
+            this.NameBox.Name = "NameBox";
+            this.NameBox.Size = new System.Drawing.Size(100, 20);
+            this.NameBox.TabIndex = 15;
+            this.NameBox.Text = "Ami";
             // 
             // label9
             // 
@@ -218,7 +231,6 @@
             this.label8.Size = new System.Drawing.Size(26, 13);
             this.label8.TabIndex = 13;
             this.label8.Text = "Port";
-            this.label8.Click += new System.EventHandler(this.label8_Click);
             // 
             // PortBox
             // 
@@ -238,7 +250,7 @@
             // 
             // SstartButt
             // 
-            this.SstartButt.Location = new System.Drawing.Point(382, 67);
+            this.SstartButt.Location = new System.Drawing.Point(374, 67);
             this.SstartButt.Name = "SstartButt";
             this.SstartButt.Size = new System.Drawing.Size(95, 58);
             this.SstartButt.TabIndex = 10;
@@ -248,13 +260,14 @@
             // 
             // RaiseButton
             // 
-            this.RaiseButton.Location = new System.Drawing.Point(712, 67);
+            this.RaiseButton.Location = new System.Drawing.Point(706, 67);
             this.RaiseButton.Name = "RaiseButton";
             this.RaiseButton.Size = new System.Drawing.Size(120, 58);
             this.RaiseButton.TabIndex = 3;
             this.RaiseButton.Text = "Raise";
             this.RaiseButton.UseVisualStyleBackColor = true;
             this.RaiseButton.Visible = false;
+            this.RaiseButton.Click += new System.EventHandler(this.RaiseButton_Click);
             // 
             // FoldButton
             // 
@@ -280,34 +293,17 @@
             this.Check_CallButton.Visible = false;
             this.Check_CallButton.Click += new System.EventHandler(this.Check_CallButton_Click);
             // 
-            // labeMyRaise
-            // 
-            this.labeMyRaise.AutoSize = true;
-            this.labeMyRaise.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.labeMyRaise.Location = new System.Drawing.Point(698, 33);
-            this.labeMyRaise.Name = "labeMyRaise";
-            this.labeMyRaise.Size = new System.Drawing.Size(21, 24);
-            this.labeMyRaise.TabIndex = 9;
-            this.labeMyRaise.Text = "0";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label1.Location = new System.Drawing.Point(560, 33);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(132, 24);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "Ваша ставка";
-            // 
             // trackBarRaise
             // 
             this.trackBarRaise.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.trackBarRaise.Location = new System.Drawing.Point(397, 9);
+            this.trackBarRaise.Maximum = 1000;
+            this.trackBarRaise.Minimum = 10;
             this.trackBarRaise.Name = "trackBarRaise";
             this.trackBarRaise.Size = new System.Drawing.Size(418, 45);
             this.trackBarRaise.TabIndex = 5;
             this.trackBarRaise.TickStyle = System.Windows.Forms.TickStyle.TopLeft;
+            this.trackBarRaise.Value = 10;
             // 
             // labelBank
             // 
@@ -359,7 +355,6 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(855, 451);
             this.panel2.TabIndex = 10;
-            this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
             // 
             // UserCard9
             // 
@@ -371,7 +366,6 @@
             this.UserCard9.Size = new System.Drawing.Size(40, 50);
             this.UserCard9.TabIndex = 39;
             this.UserCard9.TabStop = false;
-            this.UserCard9.Click += new System.EventHandler(this.pictureBox19_Click);
             // 
             // UserCard10
             // 
@@ -383,7 +377,6 @@
             this.UserCard10.Size = new System.Drawing.Size(40, 50);
             this.UserCard10.TabIndex = 38;
             this.UserCard10.TabStop = false;
-            this.UserCard10.Click += new System.EventHandler(this.pictureBox20_Click);
             // 
             // UserCard7
             // 
@@ -406,7 +399,6 @@
             this.UserCard8.Size = new System.Drawing.Size(40, 50);
             this.UserCard8.TabIndex = 36;
             this.UserCard8.TabStop = false;
-            this.UserCard8.Click += new System.EventHandler(this.pictureBox18_Click);
             // 
             // UserCard6
             // 
@@ -418,7 +410,6 @@
             this.UserCard6.Size = new System.Drawing.Size(40, 50);
             this.UserCard6.TabIndex = 35;
             this.UserCard6.TabStop = false;
-            this.UserCard6.Click += new System.EventHandler(this.pictureBox15_Click);
             // 
             // UserCard5
             // 
@@ -430,7 +421,6 @@
             this.UserCard5.Size = new System.Drawing.Size(40, 50);
             this.UserCard5.TabIndex = 34;
             this.UserCard5.TabStop = false;
-            this.UserCard5.Click += new System.EventHandler(this.pictureBox16_Click);
             // 
             // UserCard2
             // 
@@ -442,7 +432,6 @@
             this.UserCard2.Size = new System.Drawing.Size(40, 50);
             this.UserCard2.TabIndex = 33;
             this.UserCard2.TabStop = false;
-            this.UserCard2.Click += new System.EventHandler(this.pictureBox13_Click);
             // 
             // UserCard1
             // 
@@ -454,7 +443,6 @@
             this.UserCard1.Size = new System.Drawing.Size(40, 50);
             this.UserCard1.TabIndex = 32;
             this.UserCard1.TabStop = false;
-            this.UserCard1.Click += new System.EventHandler(this.pictureBox14_Click);
             // 
             // UserCard4
             // 
@@ -466,7 +454,6 @@
             this.UserCard4.Size = new System.Drawing.Size(40, 50);
             this.UserCard4.TabIndex = 31;
             this.UserCard4.TabStop = false;
-            this.UserCard4.Click += new System.EventHandler(this.pictureBox12_Click);
             // 
             // UserCard3
             // 
@@ -478,7 +465,6 @@
             this.UserCard3.Size = new System.Drawing.Size(40, 50);
             this.UserCard3.TabIndex = 30;
             this.UserCard3.TabStop = false;
-            this.UserCard3.Click += new System.EventHandler(this.pbMyCard1_Click);
             // 
             // card5
             // 
@@ -513,18 +499,6 @@
             this.card3.TabIndex = 17;
             this.card3.TabStop = false;
             // 
-            // BankLabel
-            // 
-            this.BankLabel.AutoSize = true;
-            this.BankLabel.BackColor = System.Drawing.Color.Transparent;
-            this.BankLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.BankLabel.ForeColor = System.Drawing.SystemColors.Control;
-            this.BankLabel.Location = new System.Drawing.Point(409, 78);
-            this.BankLabel.Name = "BankLabel";
-            this.BankLabel.Size = new System.Drawing.Size(80, 24);
-            this.BankLabel.TabIndex = 0;
-            this.BankLabel.Text = "Банк: 0";
-            // 
             // card2
             // 
             this.card2.BackColor = System.Drawing.Color.Transparent;
@@ -558,7 +532,6 @@
             this.label7.Size = new System.Drawing.Size(77, 24);
             this.label7.TabIndex = 14;
             this.label7.Text = "игрок1";
-            this.label7.Click += new System.EventHandler(this.label7_Click);
             // 
             // label6
             // 
@@ -686,7 +659,18 @@
             this.pictureBox2.Size = new System.Drawing.Size(174, 63);
             this.pictureBox2.TabIndex = 2;
             this.pictureBox2.TabStop = false;
-            this.pictureBox2.Click += new System.EventHandler(this.pictureBox2_Click);
+            // 
+            // BankLabel
+            // 
+            this.BankLabel.AutoSize = true;
+            this.BankLabel.BackColor = System.Drawing.Color.Transparent;
+            this.BankLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.BankLabel.ForeColor = System.Drawing.SystemColors.Control;
+            this.BankLabel.Location = new System.Drawing.Point(409, 90);
+            this.BankLabel.Name = "BankLabel";
+            this.BankLabel.Size = new System.Drawing.Size(63, 24);
+            this.BankLabel.TabIndex = 0;
+            this.BankLabel.Text = "Банк!";
             // 
             // pictureBox1
             // 
@@ -698,23 +682,6 @@
             this.pictureBox1.Size = new System.Drawing.Size(61, 59);
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
-            // 
-            // NameBox
-            // 
-            this.NameBox.Location = new System.Drawing.Point(550, 105);
-            this.NameBox.Name = "NameBox";
-            this.NameBox.Size = new System.Drawing.Size(100, 20);
-            this.NameBox.TabIndex = 15;
-            this.NameBox.Text = "Ami";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(508, 105);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(35, 13);
-            this.label10.TabIndex = 16;
-            this.label10.Text = "Name";
             // 
             // MainForm
             // 
@@ -777,17 +744,12 @@
         private System.Windows.Forms.ToolStripMenuItem помощьToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem справкаToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem обАтореToolStripMenuItem;
-        public System.Windows.Forms.ListBox LOgi;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button RaiseButton;
         private System.Windows.Forms.Button FoldButton;
-        private System.Windows.Forms.Label labeMyRaise;
-        private System.Windows.Forms.Label label1;
         public System.Windows.Forms.TrackBar trackBarRaise;
         public System.Windows.Forms.Button Check_CallButton;
         public System.Windows.Forms.Label labelBank;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        public System.Windows.Forms.Label BankLabel;
         public System.Windows.Forms.PictureBox pictureBox2;
         public System.Windows.Forms.PictureBox pictureBox7;
         public System.Windows.Forms.PictureBox pictureBox5;
@@ -824,6 +786,9 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox NameBox;
+        public System.Windows.Forms.Label BankLabel;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        public System.Windows.Forms.ListBox LOgi;
     }
 }
 

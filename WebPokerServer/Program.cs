@@ -73,7 +73,7 @@ namespace WebPokerServer
             try
             {
                 //конечная локальная точка
-                int Port = 11000; 
+                int Port = 11020; 
                 IPHostEntry ipHost = Dns.GetHostEntry("localhost");
                 IPAddress ipAddr = ipHost.AddressList[1];
                 IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, Port);
